@@ -5,9 +5,23 @@
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
   <script src="https://cdn.firebase.com/js/client/2.2.1/firebase.js"></script>
   <script src="https://cdn.firebase.com/libs/angularfire/1.0.0/angularfire.min.js"></script>
+  <script src="app.js"></script>
   <title>Product Testing</title>
 </head>
 <body>
-  <p>Whattap yall!</p>
+  <h1>Product Testing Information</h1>
+  <div ng-controller='productTable'>
+  <button type="button" ng-click='initDB()'>Refresh DB</button>
+    <table border="1">
+      <tr>
+        <th>Product</th>
+        <th>Test</th>
+      </tr>
+      <tr ng-repeat='productTest in data.product_tests'>
+        <td>{{productTest.product}}</td>
+        <td>{{productTest.test}}</td>
+      </tr>
+    </table>
+  </div>
 </body>
 </html>
