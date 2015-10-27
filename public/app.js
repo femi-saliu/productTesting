@@ -29,7 +29,8 @@ angular.module('productTesting',["firebase"])
       products: {
         Water: { // example entry
           manufacturer: "Team Z",
-          verified: true
+          verified: true,
+          tests: []
         }
       },
       tests: [],
@@ -79,6 +80,7 @@ angular.module('productTesting',["firebase"])
     $scope.data['productTestDB'].products[name] = {
       manufacturer: manufacturer,
       verified: false,
+      tests: []
     };
     // Adds some product tests
     angular.forEach($scope.data['productTestDB'].tests, function(value, key) {
@@ -100,6 +102,7 @@ angular.module('productTesting',["firebase"])
       status: 'pending',
       comment: 'n/a',
     };
+    $scope.data['productTestDB'].products[product].tests.push(test);
     $scope.saveDB();
   };
 
@@ -142,19 +145,10 @@ angular.module('productTesting',["firebase"])
     minAge.setDate(minAge.getDate()-age);
     angular.forEach($scope.data['productTestDB'].product_tests, function(value, key) {
        if (value.date_time < minAge){
-        if (value.status === status){
-          results.push(key);
-        }
+          if (value.status === status){
+            results.push(key);
+          }
        }
-    });
-    return results;
-  };
-
-  // Gets test data from db for a single product
-  $scope.getTestsForProduct = function(product){
-    var results = [];
-    angular.forEach($scope.data['productTestDB'].product_tests, function(value, key) {
-       if (value.product === product){ results.push(value); }
     });
     return results;
   };
@@ -164,14 +158,18 @@ angular.module('productTesting',["firebase"])
     var tests;
     var results = [];
     angular.forEach($scope.data['productTestDB'].products, function(value, key) {
-       tests = $scope.getTestsForProduct(key);
-       if (tests.filter(function(element){
-        return element.status !== 'pass';
-       }).length === 0){
-        $scope.verifyProduct(key);
-        results.push(key);
-       }
+        tests = $scope.data['productTestDB'].products[key].tests;
+        console.log(tests);
+        if (tests){
+          if (tests.filter(function(element){
+           return $scope.data['productTestDB'].product_tests[key+'|'+element].status !== 'pass';
+          }).length === 0){
+           $scope.verifyProduct(key);
+           results.push(key);
+          }
+        }
     });
+    console.log(results);
     if (results.length > 0){
       alert('Verified products: '+results);
     }
