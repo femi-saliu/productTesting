@@ -1,12 +1,19 @@
 angular.module('productTesting',["firebase"])
 
+/**
+ * Controller for our product table.
+ * Handles database interaction and user input
+ */
+
 .controller('productTable',['$scope', '$firebaseObject', function($scope, $firebaseObject){
-  var ref = new Firebase("https://producttesting.firebaseio.com");
-  var firebaseObj = $firebaseObject(ref);
+  var ref = new Firebase("https://producttesting.firebaseio.com"); // database reference
+  var firebaseObj = $firebaseObject(ref); // use this object to interact with the noSQL style db
   firebaseObj.$loaded().then(function() {
-    $scope.data = firebaseObj;
+    $scope.data = firebaseObj; // places db on the scope
    });
-  $scope.currentData = {};
+  $scope.currentData = {}; // used to store some data for convenience
+
+  // Takes a string of csv data, parses it and creates new products with the data
   $scope.parseCSV = function(data){
     var rows = data.split('\r');
     var rowData;
@@ -16,16 +23,17 @@ angular.module('productTesting',["firebase"])
     }
   };
 
+  // Clears the database and sets up the tables
   $scope.initDB = function(){
-    $scope.data['productTestDB'] = { // Clears the database and sets up the tables
+    $scope.data['productTestDB'] = {
       products: {
-        Water: {
+        Water: { // example entry
           manufacturer: "Team Z",
           verified: true
         }
       },
       tests: [],
-      product_tests: {
+      product_tests: { // example entry
         "Water|Water Test": {
           comment: 'n/a',
           date_time: 1445920730678,
@@ -35,8 +43,6 @@ angular.module('productTesting',["firebase"])
         }
       },
     };
-    console.log('DB initialized');
-    // adds three tests
     $scope.addTest('Complete Documentation', 'Do the docs meet all of our requirements?');
     $scope.addTest('QA Test', 'Checks run by Quality Assurance Team');
     $scope.addTest('Beta Test', 'Initial testing with select beta testers');
@@ -44,6 +50,7 @@ angular.module('productTesting',["firebase"])
     $scope.saveDB();
   };
 
+  // This function sends any local db changes to the server
   $scope.saveDB = function(cb){
     firebaseObj.$save().then(function(ref) {
       ref.key() === firebaseObj.$id; // true //  is this needed?
@@ -53,6 +60,7 @@ angular.module('productTesting',["firebase"])
       console.log("Error:", error);
     });
   }
+
   $scope.addTest = function(name, description){
     $scope.data['productTestDB'].tests.push({
       name: name,
@@ -61,6 +69,7 @@ angular.module('productTesting',["firebase"])
     $scope.saveDB();
   };
 
+  // Saves product and test data so that the modal knows which test we are editing
   $scope.setCurrentPT = function(product, test){
     $scope.currentData.product = product;
     $scope.currentData.test = test;
@@ -113,7 +122,7 @@ angular.module('productTesting',["firebase"])
   $scope.getFailedTestsThisWeek = function(){
     var results = [];
     var minAge = new Date();
-    minAge.setDate(minAge.getDate()-7);
+    minAge.setDate(minAge.getDate()-7); // seven days ago
     angular.forEach($scope.data['productTestDB'].product_tests, function(value, key) {
        if (value.date_time > minAge){
         if (value.status === 'fail'){
@@ -141,6 +150,7 @@ angular.module('productTesting',["firebase"])
     return results;
   };
 
+  // Gets test data from db for a single product
   $scope.getTestsForProduct = function(product){
     var results = [];
     angular.forEach($scope.data['productTestDB'].product_tests, function(value, key) {
@@ -149,6 +159,7 @@ angular.module('productTesting',["firebase"])
     return results;
   };
 
+  // Sets verified to true for any product with all passing tests
   $scope.validateProductsWhichTestsAreComplete = function(){
     var tests;
     var results = [];

@@ -1,5 +1,9 @@
 angular.module('productTesting')
 
+/**
+ * Custom Directive which accepts a csv file then passes it to a parsing function
+ */
+
 .directive('fileReader', function() {
   return {
     scope: {
@@ -13,12 +17,9 @@ angular.module('productTesting')
           r.onload = function(e) {
               var contents = e.target.result;
               scope.$apply(function () {
-                // scope.fileReader = contents;
-                // use data in 'contents' to add products to db
                 scope.$parent.parseCSV(contents);
               });
           };
-
           r.readAsText(files[0]);
         }
       });
