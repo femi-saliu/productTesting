@@ -2,26 +2,68 @@
 <html lang="en" ng-app='productTesting'>
 <head>
   <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
   <script src="https://cdn.firebase.com/js/client/2.2.1/firebase.js"></script>
   <script src="https://cdn.firebase.com/libs/angularfire/1.0.0/angularfire.min.js"></script>
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>
   <script src="app.js"></script>
+  <script src="fileReader.js"></script>
   <title>Product Testing</title>
 </head>
 <body>
   <h1>Product Testing Information</h1>
   <div ng-controller='productTable'>
-  <button type="button" ng-click='initDB()'>Refresh DB</button>
+  <button type="button" class="btn btn-primary" ng-click='initDB()'>Refresh DB</button>
+  <button type="button" class="btn btn-primary" ng-click='validateProductsWhichTestsAreComplete()'>Verify Products</button>
+  <button type="button" class="btn btn-primary" ng-click='getFailedTestsThisWeek()'>Get Failed Tests</button>
     <table border="1">
       <tr>
         <th>Product</th>
         <th>Test</th>
+        <th>Date/Time</th>
+        <th colspan="2">Status</th>
+        <th colspan="3">Comment</th>
       </tr>
-      <tr ng-repeat='productTest in data.product_tests'>
-        <td>{{productTest.product}}</td>
-        <td>{{productTest.test}}</td>
+      <tr ng-repeat='pT in data.productTestDB.product_tests'>
+        <td>{{pT.product}}</td>
+        <td>{{pT.test}}</td>
+        <td>{{pT.date_time | date:'short'}}</td>
+        <td>{{pT.status}}</td>
+        <td>
+          <button type="button" class="btn btn-primary" ng-click='passProductTest(pT.product,pT.test)'>Pass</button>
+          <button type="button" class="btn btn-primary" ng-click='failProductTest(pT.product,pT.test)'>Fail</button>
+        </td>
+        <td>{{pT.comment}}</td>
+        <td>
+          <button type="button" class="btn btn-primary" ng-click="setCurrentPT(pT.product,pT.test)" data-toggle="modal" data-target=".comment-modal">edit</button>
+        </td>
       </tr>
     </table>
+    <input type="file" file-reader="fileContent" accept=".csv"/>
+
+    <div class="modal fade comment-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+          <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Update Comment for {{currentData.product}} - {{currentData.test}}:</h4>
+              </div>
+              <div class="modal-body">
+                <textarea rows="2" cols="50" ng-model="currentData.comment"></textarea>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" ng-click="setProductTestComment(currentData.product, currentData.test, currentData.comment)" class="btn btn-primary" data-dismiss="modal">Save changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
   </div>
+
 </body>
 </html>
